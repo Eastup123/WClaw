@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+
+# Local secrets and machine-specific config
+config/config.yaml
