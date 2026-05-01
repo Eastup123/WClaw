@@ -3,3 +3,4 @@ __pycache__/
 
 # Local secrets and machine-specific config
 config/config.yaml
+test*.py
