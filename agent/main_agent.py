@@ -5,8 +5,8 @@ from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
 
 from subagents import build_subagents
+from tools import build_toolset
 from utils.env_utils import apply_environment
-
 
 def create_agent(settings: dict[str, Any]):
     apply_environment(settings)
@@ -14,11 +14,12 @@ def create_agent(settings: dict[str, Any]):
     project_root = Path(settings["_meta"]["project_root"])
     skills_dir = (project_root / settings["paths"]["skills_dir"]).resolve()
     backend_root = (project_root / settings["backend"]["root_dir"]).resolve()
+    main_agent = settings["main_agent"]
 
     return create_deep_agent(
         model=settings["llm"]["model"],
-        system_prompt=settings["prompts"]["main_agent"],
-        tools=[],
+        system_prompt=main_agent["prompt"],
+        tools=build_toolset(main_agent.get("tools")),
         skills=[str(skills_dir)],
         subagents=build_subagents(settings),
         backend=FilesystemBackend(

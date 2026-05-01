@@ -1,3 +1,4 @@
 deepagents
 langchain-openai
 PyYAML
+tavily-python

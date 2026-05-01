@@ -2,7 +2,11 @@ from pathlib import Path
 from typing import Any
 
 from agent import create_agent
-from runtime.formatting import extract_stream_text, format_agent_result
+from runtime.formatting import (
+    extract_runtime_activities,
+    extract_stream_text,
+    format_agent_result,
+)
 from utils import load_settings
 
 
@@ -13,6 +17,7 @@ def _stream_agent_reply(agent: Any, messages: list[Any]) -> dict[str, Any] | Non
     last_values: dict[str, Any] | None = None
     active_message_id: str | None = None
     printed_by_message_id: dict[str, str] = {}
+    announced_activity_ids: set[str] = set()
     started_reply = False
 
     for mode, payload in agent.stream(
@@ -21,6 +26,17 @@ def _stream_agent_reply(agent: Any, messages: list[Any]) -> dict[str, Any] | Non
     ):
         if mode == "messages":
             message, metadata = payload
+            for activity in extract_runtime_activities(message):
+                activity_id = activity["call_id"]
+                if activity_id in announced_activity_ids:
+                    continue
+                if started_reply:
+                    print()
+                    started_reply = False
+                    active_message_id = None
+                print(f"WClaw[{activity['kind']}]> {activity['label']}", flush=True)
+                announced_activity_ids.add(activity_id)
+
             if metadata.get("langgraph_node") != "model":
                 continue
 
